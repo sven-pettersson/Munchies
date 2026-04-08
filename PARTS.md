@@ -1,3 +1,4 @@
+
 # Munchies — Build Progress
 
 ## Overview
@@ -20,14 +21,16 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 2 — Network Layer & Data Models `[ ]`
+### Part 2 — Network Layer & Data Models `[x]`
 - DTOs matching the API responses (RestaurantDto, FilterDto, OpenStatusDto)
 - Domain models (Restaurant, Filter, OpenStatus)
 - Ktor `HttpClient` setup with JSON serialization + logging
 - `MunchiesApi` interface + implementation for all 3 endpoints
 - Error handling via sealed `Result` type
+- `MunchiesApiTest` — MockEngine tests: happy path, HTTP errors, malformed JSON
+- `RestaurantMapperTest` / `FilterMapperTest` — pure DTO→domain mapping tests
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 

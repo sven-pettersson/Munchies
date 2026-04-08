@@ -5,7 +5,9 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    jvm() // enables commonTest via jvmTest — fast, no device needed
+
+    android {
         namespace = "se.scomas.munchies.shared"
         compileSdk = 36
         minSdk = 26
@@ -28,6 +30,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
