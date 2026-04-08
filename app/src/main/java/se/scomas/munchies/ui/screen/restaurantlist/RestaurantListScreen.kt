@@ -13,28 +13,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import org.koin.androidx.compose.koinViewModel
 import se.scomas.munchies.ui.screen.restaurantlist.components.FilterBar
 import se.scomas.munchies.ui.screen.restaurantlist.components.RestaurantCard
+import se.scomas.munchies.ui.screen.restaurantlist.components.RestaurantCardSkeleton
 import se.scomas.munchies.ui.theme.MunchiesTheme
 import se.scomas.munchies.ui.theme.munchiesColors
 import se.scomas.munchies.ui.theme.spacing
 
-// ── Stateful entry point (uses Koin ViewModel) ────────────────────────────────
+// ── Stateful entry point ──────────────────────────────────────────────────────
 
 @Composable
 fun RestaurantListScreen(
@@ -44,7 +46,6 @@ fun RestaurantListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Refresh whenever the screen comes back to the foreground.
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -57,20 +58,26 @@ fun RestaurantListScreen(
         onRestaurantClick = onRestaurantClick,
         onFilterClick = viewModel::onFilterToggle,
         onRetry = { viewModel.onRefresh() },
+        onRefresh = { viewModel.onRefresh() },
         modifier = modifier
     )
 }
 
 // ── Stateless content (previewable) ──────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun RestaurantListContent(
     uiState: RestaurantListUiState,
     onRestaurantClick: (String) -> Unit,
     onFilterClick: (String) -> Unit,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Pull-to-refresh only active when content is already visible
+    val isRefreshing = uiState.isLoading && uiState.restaurants.isNotEmpty()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -97,9 +104,13 @@ internal fun RestaurantListContent(
             Spacer(Modifier.height(MaterialTheme.spacing.md))
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+            modifier = Modifier.fillMaxSize()
+        ) {
             when {
-                uiState.isLoading && uiState.restaurants.isEmpty() -> LoadingContent()
+                uiState.isLoading && uiState.restaurants.isEmpty() -> SkeletonContent()
                 uiState.error != null && uiState.restaurants.isEmpty() -> ErrorContent(
                     message = uiState.error,
                     onRetry = onRetry
@@ -135,9 +146,13 @@ private fun RestaurantList(
 }
 
 @Composable
-private fun LoadingContent() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = MaterialTheme.munchiesColors.onBackground)
+private fun SkeletonContent() {
+    LazyColumn(
+        contentPadding = PaddingValues(MaterialTheme.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.md),
+        userScrollEnabled = false
+    ) {
+        items(4) { RestaurantCardSkeleton() }
     }
 }
 
@@ -194,62 +209,67 @@ private val previewFilters = listOf(
 )
 
 private val previewRestaurants = listOf(
-    RestaurantUiModel("1", "Wayne Burgers",         4.6, 9,  "https://food-delivery.umain.io/images/restaurant/burgers.png", isOpen = true),
-    RestaurantUiModel("2", "Yuma's Candyshop",      4.7, 45, "https://food-delivery.umain.io/images/restaurant/candy.png",   isOpen = false),
+    RestaurantUiModel("1", "Wayne Burgers",          4.6, 9,  "https://food-delivery.umain.io/images/restaurant/burgers.png",    isOpen = true),
+    RestaurantUiModel("2", "Yuma's Candyshop",       4.7, 45, "https://food-delivery.umain.io/images/restaurant/candy.png",      isOpen = false),
     RestaurantUiModel("3", "Guillaume's Croissants", 5.0, 17, "https://food-delivery.umain.io/images/restaurant/croissants.png", isOpen = true),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "List – Loaded – Light", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun ListLoadedLightPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(restaurants = previewRestaurants, filters = previewFilters),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}
+            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "List – Loaded – Dark", showBackground = true, backgroundColor = 0xFF121212, widthDp = 360, heightDp = 800)
 @Composable
 private fun ListLoadedDarkPreview() {
     MunchiesTheme(darkTheme = true) {
         RestaurantListContent(
             uiState = RestaurantListUiState(restaurants = previewRestaurants, filters = previewFilters),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}
+            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
 
-@Preview(name = "List – Loading", showBackground = true, widthDp = 360, heightDp = 800)
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(name = "List – Skeleton", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-private fun ListLoadingPreview() {
+private fun ListSkeletonPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(isLoading = true),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}
+            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "List – Error", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun ListErrorPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(error = "Could not reach the server"),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}
+            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "List – Empty filters", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun ListEmptyPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(filters = previewFilters),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}
+            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
         )
     }
 }

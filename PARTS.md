@@ -98,13 +98,13 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 8 — Polish & README `[ ]`
-- Loading skeletons / shimmer placeholders
-- Proper error snackbar / retry UI
-- Open/closed status with color indicator
-- README finalization with architecture description, setup instructions, screenshots section
+### Part 8 — Polish & README `[x]`
+- `Shimmer.kt` — animated `Brush.linearGradient` shimmer brush utility
+- `RestaurantCardSkeleton` — mirrors card layout with shimmer placeholders; replaces spinner on initial load
+- `PullToRefreshBox` wrapping the list for manual refresh when content is already visible
+- README fully written — architecture table, feature list, tech stack, API reference, setup instructions, Part-by-Part progress
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 
