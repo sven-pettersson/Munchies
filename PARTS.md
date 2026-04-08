@@ -59,14 +59,15 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 5 — Design Tokens & Theme `[ ]`
-- Color tokens (background, surface, primary, text, tag colors)
-- Typography tokens (headline, body, label sizes/weights)
-- Spacing & shape tokens
-- Update `Theme.kt` to wire everything together
-- Dark mode support
+### Part 5 — Design Tokens & Theme `[x]`
+- `MunchiesColors` — semantic color tokens (background, surface, open/closed status, chip states) for light + dark
+- `MunchiesTypography` — full type scale (headline → labelSmall) via system sans-serif
+- `Spacing` — xs/sm/md/lg/xl/xxl dp tokens via `CompositionLocal`
+- `MunchiesRadius` — semantic shape aliases (chip pill, card 16dp, image 12dp)
+- `MunchiesTheme` — wires all tokens, sets status bar color, disables dynamic color
+- `MaterialTheme.munchiesColors` / `.spacing` / `.radius` extensions for clean composable access
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 
