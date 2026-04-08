@@ -1,7 +1,7 @@
 # Munchies
 
 This is a model test app built for the [Umain Mobile Work Test](https://github.com/eidra-umain/work-test-mobile).
-I have used Claude quiet a lot since that will reelect the way I would develop under normal circumstances the distance between ideas and production becomes a minimum. But it has been created from a set of steps and requirements I have set up. Among those where:
+I have used Claude quiet a lot since that will reflect the way I would develop an app from scratch under normal circumstances. I like that the distance between ideas and production becomes a minimum. It it has been created from a set of steps and requirements I have set up. The Among those where:
 
 - Dividing the code into a shared KMP part and the android app part. This to make it possible to use KMP as a mutual code divided by the iOS and Android environments
 - Create a repository fetching the data from backend and let it live in the KMP environment. This will lessen the coupling between the view and the backend to a minimum. 
