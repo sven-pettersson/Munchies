@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.Modifier
-import se.scomas.munchies.ui.screen.restaurantlist.RestaurantListScreen
+import se.scomas.munchies.navigation.MunchiesNavGraph
 import se.scomas.munchies.ui.theme.MunchiesTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,8 +16,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MunchiesTheme {
-                RestaurantListScreen(
-                    onRestaurantClick = { /* TODO Part 7: navigate to detail */ },
+                MunchiesNavGraph(
                     modifier = Modifier
                         .fillMaxSize()
                         .safeDrawingPadding()

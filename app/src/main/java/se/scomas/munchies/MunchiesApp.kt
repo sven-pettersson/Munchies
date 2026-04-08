@@ -6,6 +6,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import se.scomas.munchies.shared.di.sharedModule
+import se.scomas.munchies.ui.screen.restaurantdetail.RestaurantDetailViewModel
 import se.scomas.munchies.ui.screen.restaurantlist.RestaurantListViewModel
 
 class MunchiesApp : Application() {
@@ -20,4 +21,5 @@ class MunchiesApp : Application() {
 
 private val appModule = module {
     viewModel { RestaurantListViewModel(get(), get()) }
+    viewModel { params -> RestaurantDetailViewModel(params.get(), get()) }
 }

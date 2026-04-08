@@ -85,13 +85,16 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 7 — Restaurant Detail Screen `[ ]`
-- `RestaurantDetailViewModel` (fetches open status, resolves filter names)
-- `RestaurantDetailScreen` composable (hero image, info, filter tags, open/closed)
-- Navigation setup (NavHost, routes, back stack)
-- Wire detail into `MainActivity`
+### Part 7 — Restaurant Detail Screen `[x]`
+- `MunchiesNavGraph` — NavHost with list + detail routes, restaurantId as nav arg
+- `RestaurantDetailUiState` + `RestaurantDetailUiModel` + `FilterTagUiModel`
+- `RestaurantDetailViewModel` — reads entirely from cached repository flows, handles loading/not-found
+- `RestaurantDetailScreen` — hero image with floating back + open/closed badge, name, rating, delivery time, filter tags
+- Light/dark and loading previews
+- Background refresh on `RestaurantListScreen` via `repeatOnLifecycle(STARTED)`
+- Detail ViewModel registered in Koin appModule with `SavedStateHandle`
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 
