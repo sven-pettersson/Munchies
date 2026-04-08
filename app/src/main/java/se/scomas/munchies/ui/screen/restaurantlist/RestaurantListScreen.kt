@@ -57,6 +57,7 @@ fun RestaurantListScreen(
         uiState = uiState,
         onRestaurantClick = onRestaurantClick,
         onFilterClick = viewModel::onFilterToggle,
+        onClearFilters = viewModel::onClearFilters,
         onRetry = { viewModel.onRefresh() },
         onRefresh = { viewModel.onRefresh() },
         modifier = modifier
@@ -71,6 +72,7 @@ internal fun RestaurantListContent(
     uiState: RestaurantListUiState,
     onRestaurantClick: (String) -> Unit,
     onFilterClick: (String) -> Unit,
+    onClearFilters: () -> Unit,
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
@@ -99,6 +101,7 @@ internal fun RestaurantListContent(
             FilterBar(
                 filters = uiState.filters,
                 onFilterClick = onFilterClick,
+                onClearFilters = onClearFilters,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(MaterialTheme.spacing.md))
@@ -221,7 +224,7 @@ private fun ListLoadedLightPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(restaurants = previewRestaurants, filters = previewFilters),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
+            onRestaurantClick = {}, onFilterClick = {}, onClearFilters = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
@@ -233,7 +236,7 @@ private fun ListLoadedDarkPreview() {
     MunchiesTheme(darkTheme = true) {
         RestaurantListContent(
             uiState = RestaurantListUiState(restaurants = previewRestaurants, filters = previewFilters),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
+            onRestaurantClick = {}, onFilterClick = {}, onClearFilters = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
@@ -245,7 +248,7 @@ private fun ListSkeletonPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(isLoading = true),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
+            onRestaurantClick = {}, onFilterClick = {}, onClearFilters = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
@@ -257,7 +260,7 @@ private fun ListErrorPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(error = "Could not reach the server"),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
+            onRestaurantClick = {}, onFilterClick = {}, onClearFilters = {}, onRetry = {}, onRefresh = {}
         )
     }
 }
@@ -269,7 +272,7 @@ private fun ListEmptyPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantListContent(
             uiState = RestaurantListUiState(filters = previewFilters),
-            onRestaurantClick = {}, onFilterClick = {}, onRetry = {}, onRefresh = {}
+            onRestaurantClick = {}, onFilterClick = {}, onClearFilters = {}, onRetry = {}, onRefresh = {}
         )
     }
 }

@@ -1,8 +1,21 @@
 # Munchies
 
-A restaurant discovery app built for the [Umain Mobile Work Test](https://github.com/eidra-umain/work-test-mobile).
+This is a model test app built for the [Umain Mobile Work Test](https://github.com/eidra-umain/work-test-mobile).
+I have used Claude quiet a lot since that will reelect the way I would develop under normal circumstances the distance between ideas and production becomes a minimum. But it has been created from a set of steps and requirements I have set up. Among those where:
 
----
+- Dividing the code into a shared KMP part and the android app part. This to make it possible to use KMP as a mutual code divided by the iOS and Android environments
+- Create a repository fetching the data from backend and let it live in the KMP environment. This will lessen the coupling between the view and the backend to a minimum. 
+- Data is cached in-memory for the lifetime of the app session, reducing repeated network calls. Persistent on-device storage (SQLDelight/DataStore) is a planned next step.
+- I have added Jetpack Compose Objects to handle the parts of the views. This to make them reusable and stable.
+- I have implemented the Theme catalog to handle values coming from figma design
+
+The parts that I have not yet implemented but should be considered are 
+
+- Setting upp product flavors for the app to make release stable and make the distinction between Prod, Staging and Testing clear. The different types should be set by a Git Branch Straegy and done while deploying. But at the same time making the different types from inside Android Studio can be vital when handling support.
+- In conjunction with Backend I would like to introduce feature flags to the app. This to make it possible to add new features in a nice and secure way.
+- Setup a deployment strategy including Alpha Testing, Beta Testing and Production.
+- Setup a way to fast track changed data from backend. If for example opening times changes for a restaurant it should be reflected asap.
+
 
 ## Architecture
 

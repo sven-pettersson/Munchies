@@ -6,11 +6,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import se.scomas.munchies.shared.repository.MunchiesRepository
 
 class RestaurantDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    repository: MunchiesRepository
+    private val repository: MunchiesRepository
 ) : ViewModel() {
 
     private val restaurantId: String = checkNotNull(savedStateHandle["restaurantId"])
@@ -44,4 +45,6 @@ class RestaurantDetailViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = RestaurantDetailUiState(isLoading = true)
     )
+
+    fun onRetry() = viewModelScope.launch { repository.refresh() }
 }

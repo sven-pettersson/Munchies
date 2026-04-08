@@ -4,8 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,7 +53,12 @@ fun RestaurantDetailScreen(
     viewModel: RestaurantDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    RestaurantDetailContent(uiState = uiState, onBack = onBack, modifier = modifier)
+    RestaurantDetailContent(
+        uiState = uiState,
+        onBack = onBack,
+        onRetry = { viewModel.onRetry() },
+        modifier = modifier
+    )
 }
 
 // ── Stateless content (previewable) ──────────────────────────────────────────
@@ -61,6 +67,7 @@ fun RestaurantDetailScreen(
 internal fun RestaurantDetailContent(
     uiState: RestaurantDetailUiState,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -70,7 +77,7 @@ internal fun RestaurantDetailContent(
     ) {
         when {
             uiState.isLoading -> LoadingContent()
-            uiState.error != null -> ErrorContent(message = uiState.error)
+            uiState.error != null -> ErrorContent(message = uiState.error, onRetry = onRetry)
             uiState.restaurant != null -> DetailContent(
                 restaurant = uiState.restaurant,
                 onBack = onBack
@@ -246,17 +253,29 @@ private fun LoadingContent() {
 }
 
 @Composable
-private fun ErrorContent(message: String) {
-    Box(
-        modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.lg),
-        contentAlignment = Alignment.Center
+private fun ErrorContent(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(MaterialTheme.spacing.lg),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
+            text = "Something went wrong",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.munchiesColors.onBackground,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(MaterialTheme.spacing.sm))
+        Text(
             text = message,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.munchiesColors.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+        Spacer(Modifier.height(MaterialTheme.spacing.lg))
+        Button(onClick = onRetry) { Text("Retry") }
     }
 }
 
@@ -281,7 +300,8 @@ private fun DetailOpenLightPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantDetailContent(
             uiState = RestaurantDetailUiState(restaurant = previewRestaurant),
-            onBack = {}
+            onBack = {},
+            onRetry = {}
         )
     }
 }
@@ -292,7 +312,8 @@ private fun DetailClosedDarkPreview() {
     MunchiesTheme(darkTheme = true) {
         RestaurantDetailContent(
             uiState = RestaurantDetailUiState(restaurant = previewRestaurant.copy(isOpen = false)),
-            onBack = {}
+            onBack = {},
+            onRetry = {}
         )
     }
 }
@@ -303,7 +324,8 @@ private fun DetailLoadingPreview() {
     MunchiesTheme(darkTheme = false) {
         RestaurantDetailContent(
             uiState = RestaurantDetailUiState(isLoading = true),
-            onBack = {}
+            onBack = {},
+            onRetry = {}
         )
     }
 }

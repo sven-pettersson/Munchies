@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,9 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import se.scomas.munchies.R
 import se.scomas.munchies.ui.screen.restaurantlist.FilterUiModel
 import se.scomas.munchies.ui.theme.MunchiesTheme
 import se.scomas.munchies.ui.theme.munchiesColors
@@ -31,16 +34,53 @@ import se.scomas.munchies.ui.theme.spacing
 fun FilterBar(
     filters: List<FilterUiModel>,
     onFilterClick: (String) -> Unit,
+    onClearFilters: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val hasActiveFilters = filters.any { it.isSelected }
+
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
     ) {
+        // Clear chip — only visible when at least one filter is active
+        if (hasActiveFilters) {
+            item(key = "clear") {
+                ClearChip(onClick = onClearFilters)
+            }
+        }
         items(filters, key = { it.id }) { filter ->
             FilterChip(filter = filter, onClick = { onFilterClick(filter.id) })
         }
+    }
+}
+
+@Composable
+private fun ClearChip(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(MaterialTheme.radius.chip)
+            .background(MaterialTheme.munchiesColors.closedRed.copy(alpha = 0.12f))
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = MaterialTheme.spacing.sm,
+                vertical = MaterialTheme.spacing.xs
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_close),
+            contentDescription = "Clear filters",
+            tint = MaterialTheme.munchiesColors.closedRed,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(Modifier.width(MaterialTheme.spacing.xs))
+        Text(
+            text = "Clear",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.munchiesColors.closedRed
+        )
     }
 }
 
@@ -71,7 +111,7 @@ private fun FilterChip(
     ) {
         AsyncImage(
             model = filter.imageUrl,
-            contentDescription = null,
+            contentDescription = filter.name,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(24.dp)
@@ -95,11 +135,23 @@ private val previewFilters = listOf(
     FilterUiModel("4", "Asian",         "https://food-delivery.umain.io/images/filter/filter_asian.png",      isSelected = true),
 )
 
-@Preview(name = "Filter Bar – Light", showBackground = true)
+@Preview(name = "Filter Bar – With active filters", showBackground = true)
 @Composable
-private fun FilterBarLightPreview() {
+private fun FilterBarActivePreview() {
     MunchiesTheme(darkTheme = false) {
-        FilterBar(filters = previewFilters, onFilterClick = {})
+        FilterBar(filters = previewFilters, onFilterClick = {}, onClearFilters = {})
+    }
+}
+
+@Preview(name = "Filter Bar – No active filters", showBackground = true)
+@Composable
+private fun FilterBarNoActivePreview() {
+    MunchiesTheme(darkTheme = false) {
+        FilterBar(
+            filters = previewFilters.map { it.copy(isSelected = false) },
+            onFilterClick = {},
+            onClearFilters = {}
+        )
     }
 }
 
@@ -107,6 +159,6 @@ private fun FilterBarLightPreview() {
 @Composable
 private fun FilterBarDarkPreview() {
     MunchiesTheme(darkTheme = true) {
-        FilterBar(filters = previewFilters, onFilterClick = {})
+        FilterBar(filters = previewFilters, onFilterClick = {}, onClearFilters = {})
     }
 }

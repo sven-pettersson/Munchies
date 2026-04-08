@@ -107,8 +107,3 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 **Status:** Complete
 
 ---
-
-## Commit History
-| Part | Commit Message |
-|------|---------------|
-| — | — |
