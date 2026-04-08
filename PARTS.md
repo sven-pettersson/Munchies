@@ -1,4 +1,5 @@
 
+
 # Munchies — Build Progress
 
 ## Overview
@@ -71,14 +72,16 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 6 — Restaurant List Screen `[ ]`
-- `RestaurantListViewModel` collects from KMP repository + filter use case
-- `FilterBar` composable (horizontal scroll, chip per filter with image + name)
-- `RestaurantCard` composable (image, name, rating, delivery time, open/closed badge)
-- `RestaurantListScreen` composable wiring it all together
-- Loading + error + empty states
+### Part 6 — Restaurant List Screen `[x]`
+- `RestaurantListUiState` + `RestaurantUiModel` + `FilterUiModel` — Android UI models decoupled from domain
+- `RestaurantListViewModel` — combines 5 repository flows + active filter state into single `StateFlow<UiState>`
+- `FilterBar` — horizontal `LazyRow` with image + name chips, selected/unselected token colors
+- `RestaurantCard` — hero image, name, rating, delivery time, open/closed badge overlay
+- `RestaurantListScreen` — loading / error+retry / empty / list states
+- `MunchiesApp` + Koin `appModule` for ViewModel registration
+- `ic_star` + `ic_clock` vector drawables
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 

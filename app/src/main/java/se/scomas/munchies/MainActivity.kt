@@ -1,4 +1,3 @@
-
 package se.scomas.munchies
 
 import android.os.Bundle
@@ -6,12 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import se.scomas.munchies.ui.screen.restaurantlist.RestaurantListScreen
 import se.scomas.munchies.ui.theme.MunchiesTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,29 +16,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MunchiesTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                RestaurantListScreen(
+                    onRestaurantClick = { /* TODO Part 7: navigate to detail */ },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .safeDrawingPadding()
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MunchiesTheme {
-        Greeting("Android")
     }
 }
