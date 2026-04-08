@@ -34,14 +34,15 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 3 — Repository & Caching `[ ]`
+### Part 3 — Repository & Caching `[x]`
 - `MunchiesRepository` interface
-- Implementation with in-memory cache using `StateFlow`
-- Cache restaurants + filters on first load
-- Background refresh (triggered on app resume via lifecycle callbacks exposed from KMP)
-- Expose `Flow<List<Restaurant>>` and `Flow<List<Filter>>`
+- `MunchiesRepositoryImpl` — in-memory cache via `StateFlow`, `Mutex`-guarded refresh
+- Restaurants, filters (resolved + deduplicated in parallel), and open statuses all cached
+- `init {}` triggers load on creation; `refresh()` safe to call on foreground resume
+- Koin `sharedModule` wires `HttpClient → MunchiesApi → MunchiesRepository`
+- `MunchiesRepositoryTest` — fake API covers happy path, error path, deduplication, loading state
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 
