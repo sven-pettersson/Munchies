@@ -1,7 +1,8 @@
 # Munchies
 
 This is a model test app built for the [Umain Mobile Work Test](https://github.com/eidra-umain/work-test-mobile).
-I have used Claude quiet a lot since that will reflect the way I would develop an app from scratch under normal circumstances. I like that the distance between ideas and production becomes a minimum. It it has been created from a set of steps and requirements I have set up. The Among those where:
+
+I have used Claude quiet a lot since that will reflect the way I would develop an app from scratch under normal circumstances. I like that the distance between ideas and production becomes a minimum. It has been created from a set of steps and requirements I have set up. The Among those where:
 
 - Dividing the code into a shared KMP part and the android app part. This to make it possible to use KMP as a mutual code divided by the iOS and Android environments
 - Create a repository fetching the data from backend and let it live in the KMP environment. This will lessen the coupling between the view and the backend to a minimum. 
@@ -11,10 +12,11 @@ I have used Claude quiet a lot since that will reflect the way I would develop a
 
 The parts that I have not yet implemented but should be considered are 
 
-- Setting upp product flavors for the app to make release stable and make the distinction between Prod, Staging and Testing clear. The different types should be set by a Git Branch Straegy and done while deploying. But at the same time making the different types from inside Android Studio can be vital when handling support.
+- Setting upp product flavors for the app to make release stable and make the distinction between Prod, Staging and Testing clear. The different types should be set by a Git Branch Strategy and done while deploying. But at the same time making the different types from inside Android Studio can be vital when handling support.
 - In conjunction with Backend I would like to introduce feature flags to the app. This to make it possible to add new features in a nice and secure way.
 - Setup a deployment strategy including Alpha Testing, Beta Testing and Production.
 - Setup a way to fast track changed data from backend. If for example opening times changes for a restaurant it should be reflected asap.
+- Maybe add a room database or a database that resides in Firebase to hold data fetched from backend. This to make sure that data is kept between sessions. Used this previous, but then we had quite a lot of data to fetch. 
 
 
 ## Architecture
