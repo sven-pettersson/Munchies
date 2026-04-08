@@ -46,13 +46,16 @@ KMP + Jetpack Compose implementation of the Umain food delivery work test.
 
 ---
 
-### Part 4 — Filter Logic `[ ]`
+### Part 4 — Filter Logic `[x]`
 - `FilterUseCase` in KMP shared module
-- Multi-select active filter state (`Set<String>`)
-- `filterRestaurants(restaurants, activeFilters)` pure function
-- Exposed as `StateFlow` for the UI to collect
+- Multi-select active filter state (`StateFlow<Set<String>>`)
+- `toggleFilter(id)` — adds/removes from active set
+- `clearFilters()` resets selection
+- `filterRestaurants(restaurants, activeFilters)` — OR logic, empty set returns all
+- Registered as Koin `single` in `sharedModule`
+- `FilterUseCaseTest` — toggle, clear, OR matching, no-filter-ids edge case
 
-**Status:** Not started
+**Status:** Complete
 
 ---
 
