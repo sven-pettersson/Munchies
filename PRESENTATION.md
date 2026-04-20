@@ -23,61 +23,57 @@ A food-delivery listing app. Browse restaurants, filter by category, check open/
 
 ```mermaid
 graph TD
-    subgraph app module  Android only
-        UI[Composable Screens]
-        VM[ViewModels]
-        NAV[Navigation]
-        TH[Theme / Design Tokens]
-    end
-
-    subgraph shared module  Kotlin Multiplatform
-        UC[FilterUseCase]
-        REPO[MunchiesRepository]
-        API[MunchiesApi]
-        DOM[Domain Models]
-        MAP[DTO Mappers]
-        DI[Koin sharedModule]
-    end
-
-    subgraph Backend
-        SRV[REST API\n/api/v1]
-    end
-
-    UI -->|collectAsState| VM
-    VM -->|combine flows| REPO
-    VM -->|calls| UC
-    REPO -->|safeCall| API
-    API -->|HTTP GET| SRV
-    SRV -.->|JSON| API
-    API --> MAP --> DOM --> REPO
+  subgraph app["app module (Android only)"]
+    UI[Composable Screens]
+    VM[ViewModels]
+    NAV[Navigation]
+    TH[Theme / Design Tokens]
+  end
+  subgraph shared["shared module (Kotlin Multiplatform)"]
+    UC[FilterUseCase]
+    REPO[MunchiesRepository]
+    API[MunchiesApi]
+    DOM[Domain Models]
+    MAP[DTO Mappers]
+  end
+  subgraph backend["Backend"]
+    SRV["REST API  /api/v1"]
+  end
+  UI -->|collectAsState| VM
+  VM -->|combine flows| REPO
+  VM -->|calls| UC
+  REPO -->|safeCall| API
+  API -->|HTTP GET| SRV
+  SRV -.->|JSON response| API
+  API --> MAP
+  MAP --> DOM
+  DOM --> REPO
 ```
 
 ### Module boundary — enforced by the build graph
 
 ```mermaid
-graph LR
-    subgraph shared commonMain  compiles on JVM
-        A[Domain Models\npure Kotlin data classes]
-        B[DTOs  kotlinx.serialization]
-        C[Mappers\npure extension functions]
-        D[MunchiesApi  Ktor]
-        E[MunchiesRepository  StateFlow]
-        F[FilterUseCase\npure logic]
-        G[Result sealed class]
-    end
-
-    subgraph app  Android only
-        H[Composables]
-        I[ViewModels  androidx.lifecycle]
-        J[UiModels]
-        K[Theme  Color Spacing Shape]
-        L[Navigation graph]
-    end
-
-    shared --> app
+graph TD
+  subgraph commonMain["shared/commonMain  (compiles on JVM)"]
+    A["Domain Models\npure Kotlin data classes"]
+    B["DTOs  kotlinx.serialization"]
+    C["Mappers  pure extension functions"]
+    D["MunchiesApi  Ktor"]
+    E["MunchiesRepository  StateFlow"]
+    F["FilterUseCase  pure logic"]
+    G["Result  sealed class"]
+  end
+  subgraph appmod["app/  (Android only)"]
+    H[Composables]
+    I["ViewModels  androidx.lifecycle"]
+    J[UiModels]
+    K["Theme  Color · Spacing · Shape"]
+    L[Navigation graph]
+  end
+  commonMain --> appmod
 ```
 
-> If `import android.*` appears in `shared`, the JVM target fails to compile. The boundary is not a convention — it is enforced.
+> `import android.*` in `shared/commonMain` = build failure on JVM target. The boundary is compile-time enforced, not a convention.
 
 ---
 
@@ -85,41 +81,40 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant UI as Composable
-    participant VM as ViewModel
-    participant REPO as Repository
-    participant API as MunchiesApi
-    participant BE as Backend
+  participant UI as Composable
+  participant VM as ViewModel
+  participant REPO as Repository
+  participant API as MunchiesApi
+  participant BE as Backend
 
-    UI->>VM: LaunchedEffect onRefresh
-    VM->>REPO: refresh()
-    REPO->>API: getRestaurants()
-    API->>BE: GET /api/v1/restaurants
-    BE-->>API: 200 JSON
-    API-->>REPO: Result.Success
-    REPO->>REPO: DTO to Domain, update StateFlow
-
-    par fetch concurrently
-        REPO->>API: getFilter(id) deduplicated
-        REPO->>API: getOpenStatus(restaurantId)
-    end
-
-    REPO-->>VM: flows emit new values
-    VM->>VM: combine to RestaurantListUiState
-    VM-->>UI: uiState emits
-    UI->>UI: recompose
+  UI->>VM: LaunchedEffect → onRefresh()
+  VM->>REPO: refresh()
+  REPO->>API: getRestaurants()
+  API->>BE: GET /api/v1/restaurants
+  BE-->>API: 200 JSON
+  API-->>REPO: Result.Success(List)
+  REPO->>REPO: DTO → Domain, update _restaurants StateFlow
+  par fetch concurrently
+    REPO->>API: getFilter(id) [deduplicated]
+  and
+    REPO->>API: getOpenStatus(restaurantId)
+  end
+  REPO-->>VM: flows emit new values
+  VM->>VM: combine() → RestaurantListUiState
+  VM-->>UI: uiState StateFlow emits
+  UI->>UI: recompose
 ```
 
 ### Screen state machine
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Loading : app start
-    Loading --> Loaded : data arrives
-    Loading --> Error : network failure
-    Error --> Loading : Retry tapped
-    Loaded --> Loading : pull-to-refresh
-    Loaded --> Loaded : filter toggled - local only
+  [*] --> Loading : app start
+  Loading --> Loaded : data arrives
+  Loading --> Error : network failure
+  Error --> Loading : Retry tapped
+  Loaded --> Loading : pull-to-refresh
+  Loaded --> Loaded : filter toggled (local only — no network)
 ```
 
 ---
@@ -130,18 +125,18 @@ stateDiagram-v2
 
 ```mermaid
 classDiagram
-    class Result~T~ {
-        <<sealed>>
-    }
-    class Success~T~ {
-        +data: T
-    }
-    class Error {
-        +message: String
-        +cause: Throwable?
-    }
-    Result <|-- Success
-    Result <|-- Error
+  class Result~T~ {
+    <<sealed>>
+  }
+  class Success~T~ {
+    +data: T
+  }
+  class Error {
+    +message: String
+    +cause: Throwable?
+  }
+  Result~T~ <|-- Success~T~
+  Result~T~ <|-- Error
 ```
 
 One `safeCall` wrapper in `MunchiesApiImpl` catches every network exception. Nothing above it ever handles a throw.
@@ -149,18 +144,18 @@ One `safeCall` wrapper in `MunchiesApiImpl` catches every network exception. Not
 ### Cache as a safety net
 
 ```mermaid
-graph LR
-    START([App starts]) --> EMPTY{Cache empty?}
-    EMPTY -->|Yes| FETCH[Fetch from network]
-    EMPTY -->|No| SHOW[Show cached data immediately]
-    FETCH --> OK{Success?}
-    OK -->|Yes| UPDATE[Update cache and rerender]
-    OK -->|No| ERR[Show error banner - cache untouched]
-    SHOW --> BG[Background refresh]
-    BG --> OK
+flowchart TD
+  A([App starts]) --> B{Cache empty?}
+  B -- yes --> C[Fetch from network]
+  C --> D{Success?}
+  D -- yes --> E[Update cache] --> F[Rerender UI]
+  D -- no --> G["Show error banner\nCache untouched - user sees last good data"]
+  B -- no --> H[Show cached data immediately]
+  H --> I[Background refresh]
+  I --> J{Success?}
+  J -- yes --> K[Update cache] --> L[Rerender UI]
+  J -- no --> M["Show error banner\nCache untouched - user sees last good data"]
 ```
-
-The list stays visible when a refresh fails. The error banner appears on top of existing data.
 
 ### Concurrency safeguards
 
@@ -204,27 +199,27 @@ Old clients survive field removals without crashing.
 ### Versioned base URL — recommendation
 
 ```
-/api/v1/restaurants  current clients
-/api/v2/restaurants  new clients
+/api/v1/restaurants  ← current clients
+/api/v2/restaurants  ← new clients
 ```
 
 ### Client–server compatibility
 
 ```mermaid
 graph LR
-    subgraph Shipped App Versions
-        A1[App v1 - API v1]
-        A2[App v2 - API v1 and v2]
-        A3[App v3 - API v2]
-    end
-    subgraph Backend
-        B1[API v1 kept alive]
-        B2[API v2 additive changes]
-    end
-    A1 --> B1
-    A2 --> B1
-    A2 --> B2
-    A3 --> B2
+  subgraph apps["Shipped App Versions"]
+    A1["App v1\ntargets API v1"]
+    A2["App v2\ntargets API v1 + v2"]
+    A3["App v3\ntargets API v2"]
+  end
+  subgraph be["Backend"]
+    B1["API v1\nkept alive"]
+    B2["API v2\nadditive changes"]
+  end
+  A1 --> B1
+  A2 --> B1
+  A2 --> B2
+  A3 --> B2
 ```
 
 Keep `v1` alive until the active install base drops below an acceptable threshold.
@@ -277,17 +272,17 @@ All business-logic tests run on the JVM — no emulator required.
 
 ```mermaid
 graph TD
-    subgraph commonTest - JVM - no emulator
-        T1[MunchiesApiTest\nhappy path, HTTP errors, malformed JSON]
-        T2[MapperTests\nDTO to Domain]
-        T3[FilterUseCaseTest\ntoggle, clear, OR filter logic]
-        T4[MunchiesRepositoryTest\nparallel fetch, dedup, error handling]
-    end
-    subgraph Planned
-        T5[Room migration tests]
-        T6[Compose screenshot tests]
-        T7[Navigation flow tests]
-    end
+  subgraph commonTest["commonTest  (JVM — no emulator)"]
+    T1["MunchiesApiTest\nhappy path · HTTP errors · malformed JSON"]
+    T2["MapperTests\nDTO to Domain"]
+    T3["FilterUseCaseTest\ntoggle · clear · OR filter logic"]
+    T4["MunchiesRepositoryTest\nparallel fetch · dedup · error handling"]
+  end
+  subgraph planned["Planned"]
+    T5[Room migration tests]
+    T6[Compose screenshot tests]
+    T7[Navigation flow tests]
+  end
 ```
 
 ---
